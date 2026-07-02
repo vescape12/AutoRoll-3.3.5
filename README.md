@@ -1,6 +1,8 @@
 Features
+
 Right-click to set auto-roll rules
-When a loot roll window appears, right-click any roll button (Need, Greed, Disenchant, Pass) to set a permanent rule for that item. The rule fires immediately for the current roll and is saved for all future encounters with the same item. Options are: Always Need, Always Greed, Always Disenchant, Always Pass, or Always Ignore (dismisses the roll window without rolling).
+When a loot roll window appears, right-click any roll button (Need, Greed, Disenchant, Pass) to set a permanent rule for that item. The rule fires immediately for the current roll and is saved for all future encounters with the same item. 
+Options are: Always Need, Always Greed, Always Disenchant, Always Pass, or Always Ignore (dismisses the roll window without rolling).
 
 Automatic rolling by item quality
 Optionally auto-roll on all green or green and blue items at or above a configurable player level, using your choice of Greed, Disenchant, or Pass. Item-specific rules always take priority over this setting.
