@@ -13,9 +13,7 @@ All saved auto-roll rules are visible in the options panel. A search box lets yo
 ElvUI compatible
 Fully compatible with ElvUI for WotLK (3.3.5), including the Loot and Loot Roll options under BlizzUI Improvements. The native Blizzard and ElvUI roll frames are used directly — no separate loot frame overlay.
 
-Usage
-/aloot — open the options panel
-Right-click any button on a loot roll window to set a permanent rule for that item
+/aroll — opens the options panel, or use the minimap button
 
 Compatibility
 
