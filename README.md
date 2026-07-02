@@ -1,6 +1,6 @@
 # AutoRoll
 
-Automates loot rolling in World of Warcraft 3.3.5a. Set permanent per-item rules by right-clicking roll buttons directly on the loot window — no extra UI overlay.
+Automates loot rolling in World of Warcraft 3.3.5. Set permanent per-item rules by right-clicking roll buttons directly on the loot window — no extra UI overlay.
 
 ## Features
 
@@ -20,5 +20,5 @@ View, search, and remove all saved rules from the options panel.
 
 ## Compatibility
 
-- World of Warcraft 3.3.5a (Wrath of the Lich King)
+- World of Warcraft 3.3.5 (Wrath of the Lich King)
 - Fully compatible with [ElvUI for WotLK](https://github.com/ElvUI-WotLK/ElvUI), including the Loot and Loot Roll options under BlizzUI Improvements
