@@ -1,0 +1,8 @@
+## Interface: 30300
+## Title: AutoRoll-3.3.5
+## Version: 1.0
+## Author: Vigge
+## Notes: AutoRoll for WoW 3.3.5, inspired by "SmartLoot" addon
+## SavedVariablesPerCharacter: AutoRoll_Options, AutoRoll_Autoroll
+
+AutoRoll.lua
