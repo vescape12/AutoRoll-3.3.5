@@ -528,7 +528,7 @@ _hookPump:SetScript("OnUpdate", function(self)
 end)
 
 function AutoRoll.OnLoad(self)
-    SLASH_AUTOROLL1 = "/aloot"
+    SLASH_AUTOROLL1 = "/aroll"
     SlashCmdList["AUTOROLL"] = function()
         AutoRoll.ToggleOptions()
     end
@@ -617,7 +617,7 @@ end
 function AutoRoll.Initialize()
 	AutoRoll.CreateMinimapButton()
 	AutoRoll.UpdateMinimapButtonPosition()
-	SL_Print("loaded. Use /aloot to open options.")
+	SL_Print("loaded. Use /aroll to open options.")
 end
 
 
