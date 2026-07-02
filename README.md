@@ -15,7 +15,7 @@ View, search, and remove all saved rules from the options panel.
 
 ## Usage
 
-- `/aloot` — open options, or click the minimap button
+- `/aroll` — open options, or click the minimap button
 - Right-click any button on a loot roll window to set a rule for that item
 
 ## Compatibility
