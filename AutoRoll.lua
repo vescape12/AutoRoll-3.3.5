@@ -413,10 +413,10 @@ local function HookRollFrameButtons(rollId, itemName, itemQuality, canDisenchant
 
     -- Maps button name / rollType value -> roll constant and label
     local rollTypeMap = {
-        [AutoRoll.Roll.Need]        = { label = "Always Need",        fn = function(d) AutoRoll.RollNeed(d.name, d.rollId, d.quality) end },
-        [AutoRoll.Roll.Greed]       = { label = "Always Greed",       fn = function(d) AutoRoll.RollGreed(d.name, d.rollId, d.quality) end },
-        [AutoRoll.Roll.Disenchant]  = { label = "Always Disenchant",  fn = function(d) AutoRoll.RollDisenchant(d.name, d.rollId, d.quality, d.canDisenchant) end },
-        [AutoRoll.Roll.Pass]        = { label = "Always Pass",        fn = function(d) AutoRoll.Pass(d.name, d.rollId, d.quality) end },
+        [AutoRoll.Roll.Need]        = { label = "Always Need on this",        fn = function(d) AutoRoll.RollNeed(d.name, d.rollId, d.quality) end },
+        [AutoRoll.Roll.Greed]       = { label = "Always Greed on this",       fn = function(d) AutoRoll.RollGreed(d.name, d.rollId, d.quality) end },
+        [AutoRoll.Roll.Disenchant]  = { label = "Always Disenchant on this",  fn = function(d) AutoRoll.RollDisenchant(d.name, d.rollId, d.quality, d.canDisenchant) end },
+        [AutoRoll.Roll.Pass]        = { label = "Always Pass on this",        fn = function(d) AutoRoll.Pass(d.name, d.rollId, d.quality) end },
     }
 
     -- Walk up from a button to find the roll frame that holds _arData
