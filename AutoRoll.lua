@@ -6,7 +6,7 @@ AutoRoll.Roll = {
 	Need = 1,
 	Greed = 2,
 	Disenchant = 3,
-    Ignore = 4,
+
 }
 AutoRoll_Options = AutoRoll_Options or {}
 AutoRoll_Autoroll = AutoRoll_Autoroll or {}
@@ -15,13 +15,6 @@ AutoRollOptionsFrame = nil
 
 local function SL_Print(msg)
 	DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00AutoRoll:|r " .. tostring(msg))
-end
-
-function AutoRoll.RollIgnore(name, quality)
-	if name then
-		AutoRoll_Autoroll[name] = { quality = quality or 0, roll = AutoRoll.Roll.Ignore }
-		AutoRoll.RenderAutorollList()
-	end
 end
 
 function AutoRoll.EnsureOptions()
@@ -157,10 +150,10 @@ local function CreateOptionsFrame()
 
 	local autoGreedLabel3 = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	autoGreedLabel3:SetPoint("LEFT", qualBtn, "RIGHT", 4, 1)
-	autoGreedLabel3:SetText("items at level")
+	autoGreedLabel3:SetText("items when player level is")
 
 	local levelBox = CreateFrame("EditBox", "AutoRollOptionsFrame_AutoGreedLevel", f, "InputBoxTemplate")
-	levelBox:SetWidth(24)
+	levelBox:SetWidth(20)
 	levelBox:SetHeight(18)
 	levelBox:SetPoint("LEFT", autoGreedLabel3, "RIGHT", 8, -1)
 	levelBox:SetAutoFocus(false)
@@ -230,7 +223,7 @@ local function CreateOptionsFrame()
 	local scrollFrame = CreateFrame("ScrollFrame", "AutoRollOptionsFrame_AutorollScroll", f, "UIPanelScrollFrameTemplate")
 	scrollFrame:SetPoint("TOPLEFT", 12, -158)
 	scrollFrame:SetWidth(527)
-	scrollFrame:SetHeight(282)
+	scrollFrame:SetHeight(312)
 
 	local content = CreateFrame("Frame", "AutoRollOptionsFrame_AutorollScrollContent", scrollFrame)
 	content:SetWidth(520)
@@ -405,109 +398,96 @@ local function HookRollFrameButtons(rollId, itemName, itemQuality, canDisenchant
         -- which ElvUI sets on each button, or fall back to position order
     }
 
-    local rollLabels = {
-        [AutoRoll.Roll.Need]        = "Always Need",
-        [AutoRoll.Roll.Greed]       = "Always Greed",
-        [AutoRoll.Roll.Disenchant]  = "Always Disenchant",
-        [AutoRoll.Roll.Pass]        = "Always Pass",
+    -- Store current roll data on each frame so hooks can read it dynamically.
+    -- Frames are reused by the game for subsequent rolls, so we can't capture
+    -- rollId/itemName in closures -- they'd be stale on the second roll.
+    -- Instead we write to frame._arData every time and read it at click time.
+    for _, frame in ipairs(frames) do
+        frame._arData = {
+            rollId       = rollId,
+            name         = itemName,
+            quality      = itemQuality,
+            canDisenchant = canDisenchant,
+        }
+    end
+
+    -- Maps button name / rollType value -> roll constant and label
+    local rollTypeMap = {
+        [AutoRoll.Roll.Need]        = { label = "Always Need",        fn = function(d) AutoRoll.RollNeed(d.name, d.rollId, d.quality) end },
+        [AutoRoll.Roll.Greed]       = { label = "Always Greed",       fn = function(d) AutoRoll.RollGreed(d.name, d.rollId, d.quality) end },
+        [AutoRoll.Roll.Disenchant]  = { label = "Always Disenchant",  fn = function(d) AutoRoll.RollDisenchant(d.name, d.rollId, d.quality, d.canDisenchant) end },
+        [AutoRoll.Roll.Pass]        = { label = "Always Pass",        fn = function(d) AutoRoll.Pass(d.name, d.rollId, d.quality) end },
     }
 
-    local function ShowAutoRollMenu(anchorFrame, rollId, canDisenchant)
-        local menuFrame = _G["AutoRoll_ContextMenu"]
-        if not menuFrame then
-            menuFrame = CreateFrame("Frame", "AutoRoll_ContextMenu", UIParent, "UIDropDownMenuTemplate")
+    -- Walk up from a button to find the roll frame that holds _arData
+    local function GetFrameData(btn)
+        local f = btn:GetParent()
+        while f do
+            if f._arData then return f._arData end
+            f = f:GetParent()
         end
-        local menuTable = {
-            {
-                text = "Always Need",
-                checked = (AutoRoll_Autoroll[itemName] and AutoRoll_Autoroll[itemName].roll == AutoRoll.Roll.Need),
-                func = function()
-                    AutoRoll.RollNeed(itemName, rollId, itemQuality)
-                    HideRollFrame(rollId)
-                end,
-            },
-            {
-                text = "Always Greed",
-                checked = (AutoRoll_Autoroll[itemName] and AutoRoll_Autoroll[itemName].roll == AutoRoll.Roll.Greed),
-                func = function()
-                    AutoRoll.RollGreed(itemName, rollId, itemQuality)
-                    HideRollFrame(rollId)
-                end,
-            },
-            {
-                text = "Always Disenchant",
-                checked = (AutoRoll_Autoroll[itemName] and AutoRoll_Autoroll[itemName].roll == AutoRoll.Roll.Disenchant),
-                func = function()
-                    AutoRoll.RollDisenchant(itemName, rollId, itemQuality, canDisenchant)
-                    HideRollFrame(rollId)
-                end,
-            },
-            {
-                text = "Always Pass",
-                checked = (AutoRoll_Autoroll[itemName] and AutoRoll_Autoroll[itemName].roll == AutoRoll.Roll.Pass),
-                func = function()
-                    AutoRoll.Pass(itemName, rollId, itemQuality)
-                    HideRollFrame(rollId)
-                end,
-            },
-            {
-                text = "Always Ignore",
-                checked = (AutoRoll_Autoroll[itemName] and AutoRoll_Autoroll[itemName].roll == AutoRoll.Roll.Ignore),
-                func = function()
-                    AutoRoll.RollIgnore(itemName, itemQuality)
-                    HideRollFrame(rollId)
-                end,
-            },
-        }
-        EasyMenu(menuTable, menuFrame, anchorFrame, 0, 32, "MENU")
     end
 
-    local function HookButton(btn)
-        if not btn or btn._autoRollHooked then return end
-        btn._autoRollHooked = true
+    -- hookRoll: the roll constant this button represents (stored at hook time)
+    local function HookButton(btn, hookRoll)
+        if not btn or not hookRoll then return end
+        local info = rollTypeMap[hookRoll]
+        if not info then return end
 
-        local origOnEnter = btn:GetScript("OnEnter")
-        btn:SetScript("OnEnter", function(self)
-            if origOnEnter then origOnEnter(self) end
-            if GameTooltip:IsShown() then
-                GameTooltip:AddLine("Right-click to set as auto-roll", 0.7, 0.7, 0.7)
-                GameTooltip:Show()
-            else
-                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                GameTooltip:SetText("Right-click to set as auto-roll", 0.7, 0.7, 0.7)
-                GameTooltip:Show()
-            end
-        end)
+        if not btn._autoRollHooked then
+            btn._autoRollHooked = true
 
-        btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-        local origOnClick = btn:GetScript("OnClick")
-        btn:SetScript("OnClick", function(self, button)
-            if button == "RightButton" then
-                ShowAutoRollMenu(self, rollId, canDisenchant)
-            elseif origOnClick then
-                origOnClick(self, button)
-            end
-        end)
+            local origOnEnter = btn:GetScript("OnEnter")
+            btn:SetScript("OnEnter", function(self)
+                if origOnEnter then origOnEnter(self) end
+                if GameTooltip:IsShown() then
+                    GameTooltip:AddLine("Right-click: " .. info.label, 0.7, 0.7, 0.7)
+                    GameTooltip:Show()
+                else
+                    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                    GameTooltip:SetText("Right-click: " .. info.label, 0.7, 0.7, 0.7)
+                    GameTooltip:Show()
+                end
+            end)
+
+            btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+            local origOnClick = btn:GetScript("OnClick")
+            btn:SetScript("OnClick", function(self, button)
+                if button == "RightButton" then
+                    local data = GetFrameData(self)
+                    if data then
+                        info.fn(data)
+                        HideRollFrame(data.rollId)
+                    end
+                elseif origOnClick then
+                    origOnClick(self, button)
+                end
+            end)
+        end
     end
+
+    local blizzButtonRolls = {
+        ["NeedButton"]       = AutoRoll.Roll.Need,
+        ["GreedButton"]      = AutoRoll.Roll.Greed,
+        ["DisenchantButton"] = AutoRoll.Roll.Disenchant,
+        ["PassButton"]       = AutoRoll.Roll.Pass,
+    }
 
     for _, frame in ipairs(frames) do
-        -- Try named children (Blizzard)
-        for btnName, _ in pairs(buttonRolls) do
+        -- Blizzard: find buttons by name
+        for btnName, roll in pairs(blizzButtonRolls) do
             local btn = _G[frame:GetName() and (frame:GetName() .. btnName) or ""]
                      or frame[btnName]
-            HookButton(btn)
+            HookButton(btn, roll)
         end
 
+        -- ElvUI: detect buttons by .rollType field
         for _, child in ipairs({frame:GetChildren()}) do
-            if child.rollType ~= nil then
-                HookButton(child)
-            end
+            if child.rollType ~= nil then HookButton(child, child.rollType) end
             local ok, grandchildren = pcall(function() return {child:GetChildren()} end)
             if ok then
                 for _, gc in ipairs(grandchildren) do
-                    if gc.rollType ~= nil then
-                        HookButton(gc)
-                    end
+                    if gc.rollType ~= nil then HookButton(gc, gc.rollType) end
                 end
             end
         end
@@ -619,7 +599,6 @@ function AutoRoll.Initialize()
 	AutoRoll.UpdateMinimapButtonPosition()
 	SL_Print("loaded. Use /aroll to open options.")
 end
-
 
 function AutoRoll.CreateMinimapButton()
 	if AutoRoll.MinimapButton then return end
@@ -864,7 +843,6 @@ function AutoRoll.RenderAutorollList()
 				{ text = "Greed", value = AutoRoll.Roll.Greed },
 				{ text = "Disenchant", value = AutoRoll.Roll.Disenchant },
 				{ text = "Pass", value = AutoRoll.Roll.Pass },
-				{ text = "Ignore", value = AutoRoll.Roll.Ignore },
 			}
 
 			dropdown:SetScript("OnClick", function(self)
@@ -912,8 +890,6 @@ function AutoRoll.RenderAutorollList()
 				textStr = "Disenchant"
 			elseif info.roll == AutoRoll.Roll.Pass then
 				textStr = "Pass"
-			elseif info.roll == AutoRoll.Roll.Ignore then
-				textStr = "Ignore"
 			end
 			row.dropdown:SetText(textStr)
 		end
