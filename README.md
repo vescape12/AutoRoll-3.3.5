@@ -1,4 +1,4 @@
-# AutoRoll
+# AutoRoll-3.3.5
 
 Automates loot rolling in World of Warcraft 3.3.5. Set permanent per-item rules by right-clicking roll buttons directly on the loot window — no extra UI overlay.
 
