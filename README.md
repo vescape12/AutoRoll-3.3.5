@@ -5,6 +5,8 @@ Automates loot rolling in World of Warcraft 3.3.5. Set permanent per-item rules 
 ## Features
 
 **Right-click any roll button to set a rule**
+
+
 Right-click Need, Greed, Disenchant, or Pass on any loot roll window to instantly roll *and* save a permanent rule for that item. Options: Always Need, Always Greed, Always Disenchant, Always Pass.
 
 **Auto-roll by item quality**
@@ -17,6 +19,11 @@ View, search, and remove all saved rules from the options panel.
 
 - `/aroll` — open options, or click the minimap button
 - Right-click any button on a loot roll window to set a rule for that item
+
+<img width="479" height="314" alt="Skärmbild 2026-07-03 171100" src="https://github.com/user-attachments/assets/5232bd34-b05d-473e-afa2-134760eb2b87" />
+<img width="412" height="101" alt="Skärmbild 2026-07-03 171210" src="https://github.com/user-attachments/assets/4e71faf5-4f60-449d-a7eb-64e0ca2d6857" />
+
+
 
 ## Compatibility
 
