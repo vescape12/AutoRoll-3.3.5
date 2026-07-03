@@ -22,8 +22,7 @@ View, search, and remove all saved rules from the options panel.
 
 <img width="479" height="314" alt="Skärmbild 2026-07-03 171100" src="https://github.com/user-attachments/assets/5232bd34-b05d-473e-afa2-134760eb2b87" />
 <img width="412" height="101" alt="Skärmbild 2026-07-03 171210" src="https://github.com/user-attachments/assets/4e71faf5-4f60-449d-a7eb-64e0ca2d6857" />
-
-
+<img width="443" height="96" alt="Skärmbild 2026-07-03 171153" src="https://github.com/user-attachments/assets/da34cdb9-48b7-4191-bf2e-cb82fbacd0e0" />
 
 ## Compatibility
 
