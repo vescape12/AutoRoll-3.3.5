@@ -22,8 +22,7 @@ View, search, and remove all saved rules from the options panel.
 - Right-click any button on a loot roll window to set a rule for that item
 
 <img width="479" height="314" alt="Skärmbild 2026-07-03 171100" src="https://github.com/user-attachments/assets/5232bd34-b05d-473e-afa2-134760eb2b87" />
-
-
+<br>
 <img width="412" height="101" alt="Skärmbild 2026-07-03 171210" src="https://github.com/user-attachments/assets/4e71faf5-4f60-449d-a7eb-64e0ca2d6857" />
 
 
