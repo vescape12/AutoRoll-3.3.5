@@ -1,4 +1,3 @@
-
 AutoRoll = {}
 AutoRoll.Version = "1.0"
 AutoRoll.Roll = {
@@ -6,7 +5,6 @@ AutoRoll.Roll = {
 	Need = 1,
 	Greed = 2,
 	Disenchant = 3,
-
 }
 AutoRoll_Options = AutoRoll_Options or {}
 AutoRoll_Autoroll = AutoRoll_Autoroll or {}
@@ -18,8 +16,8 @@ local function SL_Print(msg)
 end
 
 function AutoRoll.EnsureOptions()
-		local o = AutoRoll_Options
-		if o.Enabled == nil then o.Enabled = true end
+	local o = AutoRoll_Options
+	if o.Enabled == nil then o.Enabled = true end
 	if o.HideDefaultFrames == nil then o.HideDefaultFrames = true end
 	if o.AutoLoot == nil then o.AutoLoot = true end
 	if o.AutoConfirm == nil then o.AutoConfirm = true end
@@ -28,8 +26,8 @@ function AutoRoll.EnsureOptions()
 	if o.MinimapButtonRadius == nil then o.MinimapButtonRadius = 80 end
 	if o.AutoGreedGreens == nil then o.AutoGreedGreens = false end
 	if o.AutoGreedGreensMinLevel == nil then o.AutoGreedGreensMinLevel = 60 end
-	if o.AutoGreedRoll == nil then o.AutoGreedRoll = "disenchant" end   -- "greed", "disenchant", "pass"
-	if o.AutoGreedQualities == nil then o.AutoGreedQualities = "green" end  -- "green", "greenblue
+	if o.AutoGreedRoll == nil then o.AutoGreedRoll = "disenchant" end
+	if o.AutoGreedQualities == nil then o.AutoGreedQualities = "green" end  -- "green" or "greenblue"
 end
 
 local function CreateOptionsFrame()
@@ -49,8 +47,6 @@ local function CreateOptionsFrame()
 	title:SetPoint("TOP", 0, -16)
 	title:SetText("AutoRoll")
 
-
-	-- Enable/Disable AutoRoll checkbox
 	local enableCheck = CreateFrame("CheckButton", "AutoRollOptionsFrame_Enable", f, "UICheckButtonTemplate")
 	enableCheck:SetPoint("TOPLEFT", 10, -40)
 	enableCheck:SetChecked(AutoRoll_Options.Enabled)
@@ -62,8 +58,6 @@ local function CreateOptionsFrame()
 	enableLabel:SetPoint("LEFT", enableCheck, "RIGHT", 1, 1)
 	enableLabel:SetText("Enable AutoRoll")
 
-
-	-- Auto-roll by quality row
 	local autoGreedCheck = CreateFrame("CheckButton", "AutoRollOptionsFrame_AutoGreedGreens", f, "UICheckButtonTemplate")
 	autoGreedCheck:SetPoint("TOPLEFT", 10, -66)
 	autoGreedCheck:SetChecked(AutoRoll_Options.AutoGreedGreens)
@@ -74,7 +68,6 @@ local function CreateOptionsFrame()
 	autoGreedLabel1:SetPoint("LEFT", autoGreedCheck, "RIGHT", 1, 1)
 	autoGreedLabel1:SetText("Auto-")
 
-	-- Roll dropdown (Greed / Disenchant / Pass)
 	local rollBtn = CreateFrame("Button", "AutoRollOptionsFrame_AutoGreedRollBtn", f, "UIPanelButtonTemplate")
 	rollBtn:SetHeight(20)
 	rollBtn:SetPoint("LEFT", autoGreedLabel1, "RIGHT", 2, -1)
@@ -113,7 +106,6 @@ local function CreateOptionsFrame()
 	autoGreedLabel2:SetPoint("LEFT", rollBtn, "RIGHT", 4, 1)
 	autoGreedLabel2:SetText("all")
 
-	-- Quality dropdown (Green / Green+Blue)
 	local qualBtn = CreateFrame("Button", "AutoRollOptionsFrame_AutoGreedQualBtn", f, "UIPanelButtonTemplate")
 	qualBtn:SetHeight(20)
 	qualBtn:SetPoint("LEFT", autoGreedLabel2, "RIGHT", 2, -1)
@@ -178,7 +170,6 @@ local function CreateOptionsFrame()
 	levelLabel2:SetPoint("LEFT", levelBox, "RIGHT", 4, 0)
 	levelLabel2:SetText("or above")
 
-	-- Invisible tooltip trigger spanning the whole row
 	local rowTip = CreateFrame("Frame", nil, f)
 	rowTip:SetPoint("LEFT", autoGreedCheck, "LEFT", 0, 0)
 	rowTip:SetPoint("RIGHT", levelLabel2, "RIGHT", 0, 0)
@@ -196,7 +187,6 @@ local function CreateOptionsFrame()
 	header:SetPoint("TOPLEFT", 16, -138)
 	header:SetText("Saved auto-roll items")
 
-	-- Search box
 	local searchBox = CreateFrame("EditBox", "AutoRollOptionsFrame_Search", f, "InputBoxTemplate")
 	searchBox:SetWidth(200)
 	searchBox:SetHeight(20)
@@ -264,254 +254,214 @@ function AutoRoll.ToggleOptions()
 end
 
 function AutoRoll.ApplyOptionsFromUI()
-		AutoRoll_Options.Enabled = AutoRollOptionsFrame_Enable:GetChecked() and true or false
+	AutoRoll_Options.Enabled = AutoRollOptionsFrame_Enable:GetChecked() and true or false
 end
 
 local function DoHideRollFrame(rollId)
-    -- Blizzard default GroupLootFrames (when ElvUI Loot Roll skin is OFF)
-    for i = 1, (NUM_LOOT_ROLL_FRAMES or 4) do
-        local frame = _G["GroupLootFrame" .. i]
-        if frame and frame.rollID == rollId then
-            frame:Hide()
-        end
-    end
+	for i = 1, (NUM_LOOT_ROLL_FRAMES or 4) do
+		local frame = _G["GroupLootFrame" .. i]
+		if frame and frame.rollID == rollId then
+			frame:Hide()
+		end
+	end
 
-    -- LootRollFrame legacy fallback
-    if LootRollFrame and LootRollFrame:IsShown() then
-        LootRollFrame:Hide()
-    end
+	if LootRollFrame and LootRollFrame:IsShown() then
+		LootRollFrame:Hide()
+	end
 
-    -- ElvUI: access M.RollBars directly via the ElvUI addon table.
-    -- ElvUI[1] is the Engine (E), ElvUI[2] is the second return from
-    -- unpack(select(2, ...)) which is the Locale table -- the module
-    -- system lives on E, so we use ElvUI[1].
-    local E = ElvUI and ElvUI[1]
-    local M = E and E.GetModule and E:GetModule('Misc')
-    if M and M.RollBars then
-        -- Hide and clear the matching frame
-        for _, frame in ipairs(M.RollBars) do
-            if frame.rollID == rollId then
-                frame.rollID = nil
-                frame.time = nil
-                frame:Hide()
-                frame:ClearAllPoints()
-            end
-        end
+	local E = ElvUI and ElvUI[1]
+	local M = E and E.GetModule and E:GetModule('Misc')
+	if M and M.RollBars then
+		for _, frame in ipairs(M.RollBars) do
+			if frame.rollID == rollId then
+				frame.rollID = nil
+				frame.time = nil
+				frame:Hide()
+				frame:ClearAllPoints()
+			end
+		end
 
-        -- Reanchor remaining active frames to close the gap
-        local prev = nil
-        for _, frame in ipairs(M.RollBars) do
-            if frame.rollID then
-                frame:ClearAllPoints()
-                if prev then
-                    frame:SetPoint("TOP", prev, "BOTTOM", 0, -4)
-                else
-                    frame:SetPoint("TOP", AlertFrameHolder, "BOTTOM", 0, -4)
-                end
-                prev = frame
-            end
-        end
-    else
-        -- ElvUI module not accessible: fall back to UIParent recursive scan
-        local visited = {}
-        local function scan(parent, depth)
-            if depth > 8 then return end
-            local ok, children = pcall(function() return {parent:GetChildren()} end)
-            if not ok then return end
-            for _, child in ipairs(children) do
-                if not visited[child] then
-                    visited[child] = true
-                    if child.rollID == rollId or child.rollid == rollId then
-                        child:Hide()
-                        child:ClearAllPoints()
-                    end
-                    scan(child, depth + 1)
-                end
-            end
-        end
-        scan(UIParent, 0)
-    end
+		local prev = nil
+		for _, frame in ipairs(M.RollBars) do
+			if frame.rollID then
+				frame:ClearAllPoints()
+				if prev then
+					frame:SetPoint("TOP", prev, "BOTTOM", 0, -4)
+				else
+					frame:SetPoint("TOP", AlertFrameHolder, "BOTTOM", 0, -4)
+				end
+				prev = frame
+			end
+		end
+	else
+		local visited = {}
+		local function scan(parent, depth)
+			if depth > 8 then return end
+			local ok, children = pcall(function() return {parent:GetChildren()} end)
+			if not ok then return end
+			for _, child in ipairs(children) do
+				if not visited[child] then
+					visited[child] = true
+					if child.rollID == rollId or child.rollid == rollId then
+						child:Hide()
+						child:ClearAllPoints()
+					end
+					scan(child, depth + 1)
+				end
+			end
+		end
+		scan(UIParent, 0)
+	end
 end
 
--- Deferred by one OnUpdate tick so we always run after ALL other addons'
--- START_LOOT_ROLL handlers have finished (including ElvUI showing its frame).
 local _hideQueue = {}
 local _hidePump = CreateFrame("Frame")
 _hidePump:Hide()
 _hidePump:SetScript("OnUpdate", function(self)
-    for rollId in pairs(_hideQueue) do
-        DoHideRollFrame(rollId)
-        _hideQueue[rollId] = nil
-    end
-    self:Hide()
+	for rollId in pairs(_hideQueue) do
+		DoHideRollFrame(rollId)
+		_hideQueue[rollId] = nil
+	end
+	self:Hide()
 end)
 
 local function HideRollFrame(rollId)
-    _hideQueue[rollId] = true
-    _hidePump:Show()
+	_hideQueue[rollId] = true
+	_hidePump:Show()
 end
 
--- Right-click autoroll hook system.
--- Called each time a loot roll starts. Finds the roll frame for this rollId
--- and hooks its buttons so right-clicking opens an "Always X" context menu.
 local function HookRollFrameButtons(rollId, itemName, itemQuality, canDisenchant)
-    if not itemName then return end
+	if not itemName then return end
 
-    -- Collect all frames that match this rollId
-    local frames = {}
+	local frames = {}
 
-    -- Blizzard GroupLootFrames
-    for i = 1, (NUM_LOOT_ROLL_FRAMES or 4) do
-        local f = _G["GroupLootFrame" .. i]
-        if f and f.rollID == rollId then
-            table.insert(frames, f)
-        end
-    end
+	for i = 1, (NUM_LOOT_ROLL_FRAMES or 4) do
+		local f = _G["GroupLootFrame" .. i]
+		if f and f.rollID == rollId then
+			table.insert(frames, f)
+		end
+	end
 
-    -- Recursive scan for ElvUI frames (same approach as DoHideRollFrame)
-    local visited = {}
-    local function scan(parent, depth)
-        if depth > 8 then return end
-        local ok, children = pcall(function() return {parent:GetChildren()} end)
-        if not ok then return end
-        for _, child in ipairs(children) do
-            if not visited[child] then
-                visited[child] = true
-                if child.rollID == rollId then
-                    table.insert(frames, child)
-                end
-                scan(child, depth + 1)
-            end
-        end
-    end
-    scan(UIParent, 0)
+	local visited = {}
+	local function scan(parent, depth)
+		if depth > 8 then return end
+		local ok, children = pcall(function() return {parent:GetChildren()} end)
+		if not ok then return end
+		for _, child in ipairs(children) do
+			if not visited[child] then
+				visited[child] = true
+				if child.rollID == rollId then
+					table.insert(frames, child)
+				end
+				scan(child, depth + 1)
+			end
+		end
+	end
+	scan(UIParent, 0)
 
-    -- Map of button names to roll values - we try common naming patterns
-    -- for both Blizzard and ElvUI button children
-    local buttonRolls = {
-        -- Blizzard button names (children of GroupLootFrame)
-        ["NeedButton"]         = AutoRoll.Roll.Need,
-        ["GreedButton"]        = AutoRoll.Roll.Greed,
-        ["DisenchantButton"]   = AutoRoll.Roll.Disenchant,
-        ["PassButton"]         = AutoRoll.Roll.Pass,
-        -- ElvUI uses different child names - we detect by checking .rollType
-        -- which ElvUI sets on each button, or fall back to position order
-    }
 
-    -- Store current roll data on each frame so hooks can read it dynamically.
-    -- Frames are reused by the game for subsequent rolls, so we can't capture
-    -- rollId/itemName in closures -- they'd be stale on the second roll.
-    -- Instead we write to frame._arData every time and read it at click time.
-    for _, frame in ipairs(frames) do
-        frame._arData = {
-            rollId       = rollId,
-            name         = itemName,
-            quality      = itemQuality,
-            canDisenchant = canDisenchant,
-        }
-    end
+	for _, frame in ipairs(frames) do
+		frame._arData = {
+			rollId       = rollId,
+			name         = itemName,
+			quality      = itemQuality,
+			canDisenchant = canDisenchant,
+		}
+	end
 
-    -- Maps button name / rollType value -> roll constant and label
-    local rollTypeMap = {
-        [AutoRoll.Roll.Need]        = { label = "Always Need on this",        fn = function(d) AutoRoll.RollNeed(d.name, d.rollId, d.quality) end },
-        [AutoRoll.Roll.Greed]       = { label = "Always Greed on this",       fn = function(d) AutoRoll.RollGreed(d.name, d.rollId, d.quality) end },
-        [AutoRoll.Roll.Disenchant]  = { label = "Always Disenchant on this",  fn = function(d) AutoRoll.RollDisenchant(d.name, d.rollId, d.quality, d.canDisenchant) end },
-        [AutoRoll.Roll.Pass]        = { label = "Always Pass on this",        fn = function(d) AutoRoll.Pass(d.name, d.rollId, d.quality) end },
-    }
+	local rollTypeMap = {
+		[AutoRoll.Roll.Need]        = { label = "Always Need on this",        fn = function(d) AutoRoll.RollNeed(d.name, d.rollId, d.quality) end },
+		[AutoRoll.Roll.Greed]       = { label = "Always Greed on this",       fn = function(d) AutoRoll.RollGreed(d.name, d.rollId, d.quality) end },
+		[AutoRoll.Roll.Disenchant]  = { label = "Always Disenchant on this",  fn = function(d) AutoRoll.RollDisenchant(d.name, d.rollId, d.quality, d.canDisenchant) end },
+		[AutoRoll.Roll.Pass]        = { label = "Always Pass on this",        fn = function(d) AutoRoll.Pass(d.name, d.rollId, d.quality) end },
+	}
 
-    -- Walk up from a button to find the roll frame that holds _arData
-    local function GetFrameData(btn)
-        local f = btn:GetParent()
-        while f do
-            if f._arData then return f._arData end
-            f = f:GetParent()
-        end
-    end
+	local function GetFrameData(btn)
+		local f = btn:GetParent()
+		while f do
+			if f._arData then return f._arData end
+			f = f:GetParent()
+		end
+	end
 
-    -- hookRoll: the roll constant this button represents (stored at hook time)
-    local function HookButton(btn, hookRoll)
-        if not btn or not hookRoll then return end
-        local info = rollTypeMap[hookRoll]
-        if not info then return end
+	local function HookButton(btn, hookRoll)
+		if not btn or not hookRoll then return end
+		local info = rollTypeMap[hookRoll]
+		if not info then return end
 
-        if not btn._autoRollHooked then
-            btn._autoRollHooked = true
+		if not btn._autoRollHooked then
+			btn._autoRollHooked = true
 
-            local origOnEnter = btn:GetScript("OnEnter")
-            btn:SetScript("OnEnter", function(self)
-                if origOnEnter then origOnEnter(self) end
-                if GameTooltip:IsShown() then
-                    GameTooltip:AddLine("Right-click: " .. info.label, 0.7, 0.7, 0.7)
-                    GameTooltip:Show()
-                else
-                    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                    GameTooltip:SetText("Right-click: " .. info.label, 0.7, 0.7, 0.7)
-                    GameTooltip:Show()
-                end
-            end)
+			local origOnEnter = btn:GetScript("OnEnter")
+			btn:SetScript("OnEnter", function(self)
+				if origOnEnter then origOnEnter(self) end
+				if GameTooltip:IsShown() then
+					GameTooltip:AddLine("Right-click: " .. info.label, 0.7, 0.7, 0.7)
+					GameTooltip:Show()
+				else
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+					GameTooltip:SetText("Right-click: " .. info.label, 0.7, 0.7, 0.7)
+					GameTooltip:Show()
+				end
+			end)
 
-            btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-            local origOnClick = btn:GetScript("OnClick")
-            btn:SetScript("OnClick", function(self, button)
-                if button == "RightButton" then
-                    local data = GetFrameData(self)
-                    if data then
-                        info.fn(data)
-                        HideRollFrame(data.rollId)
-                    end
-                elseif origOnClick then
-                    origOnClick(self, button)
-                end
-            end)
-        end
-    end
+			btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+			local origOnClick = btn:GetScript("OnClick")
+			btn:SetScript("OnClick", function(self, button)
+				if button == "RightButton" then
+					local data = GetFrameData(self)
+					if data then
+						info.fn(data)
+						HideRollFrame(data.rollId)
+					end
+				elseif origOnClick then
+					origOnClick(self, button)
+				end
+			end)
+		end
+	end
 
-    local blizzButtonRolls = {
-        ["NeedButton"]       = AutoRoll.Roll.Need,
-        ["GreedButton"]      = AutoRoll.Roll.Greed,
-        ["DisenchantButton"] = AutoRoll.Roll.Disenchant,
-        ["PassButton"]       = AutoRoll.Roll.Pass,
-    }
+	local blizzButtonRolls = {
+		["NeedButton"]       = AutoRoll.Roll.Need,
+		["GreedButton"]      = AutoRoll.Roll.Greed,
+		["DisenchantButton"] = AutoRoll.Roll.Disenchant,
+		["PassButton"]       = AutoRoll.Roll.Pass,
+	}
 
-    for _, frame in ipairs(frames) do
-        -- Blizzard: find buttons by name
-        for btnName, roll in pairs(blizzButtonRolls) do
-            local btn = _G[frame:GetName() and (frame:GetName() .. btnName) or ""]
-                     or frame[btnName]
-            HookButton(btn, roll)
-        end
+	for _, frame in ipairs(frames) do
+		for btnName, roll in pairs(blizzButtonRolls) do
+			local btn = _G[frame:GetName() and (frame:GetName() .. btnName) or ""] or frame[btnName]
+			HookButton(btn, roll)
+		end
 
-        -- ElvUI: detect buttons by .rollType field
-        for _, child in ipairs({frame:GetChildren()}) do
-            if child.rollType ~= nil then HookButton(child, child.rollType) end
-            local ok, grandchildren = pcall(function() return {child:GetChildren()} end)
-            if ok then
-                for _, gc in ipairs(grandchildren) do
-                    if gc.rollType ~= nil then HookButton(gc, gc.rollType) end
-                end
-            end
-        end
-    end
+		for _, child in ipairs({frame:GetChildren()}) do
+			if child.rollType ~= nil then HookButton(child, child.rollType) end
+			local ok, grandchildren = pcall(function() return {child:GetChildren()} end)
+			if ok then
+				for _, gc in ipairs(grandchildren) do
+					if gc.rollType ~= nil then HookButton(gc, gc.rollType) end
+				end
+			end
+		end
+	end
 end
 
--- Hook pump: defer button hooking by one OnUpdate tick, same as HideRollFrame,
--- so ElvUI has finished setting up its frame and buttons before we touch them.
 local _hookQueue = {}
 local _hookPump = CreateFrame("Frame")
 _hookPump:Hide()
 _hookPump:SetScript("OnUpdate", function(self)
-    for rollId, info in pairs(_hookQueue) do
-        HookRollFrameButtons(rollId, info.name, info.quality, info.canDisenchant)
-        _hookQueue[rollId] = nil
-    end
-    self:Hide()
+	for rollId, info in pairs(_hookQueue) do
+		HookRollFrameButtons(rollId, info.name, info.quality, info.canDisenchant)
+		_hookQueue[rollId] = nil
+	end
+	self:Hide()
 end)
 
 function AutoRoll.OnLoad(self)
-    SLASH_AUTOROLL1 = "/aroll"
-    SlashCmdList["AUTOROLL"] = function()
-        AutoRoll.ToggleOptions()
-    end
+	SLASH_AUTOROLL1 = "/aroll"
+	SlashCmdList["AUTOROLL"] = function()
+		AutoRoll.ToggleOptions()
+	end
 
 	self:RegisterEvent("ADDON_LOADED")
 	self:RegisterEvent("START_LOOT_ROLL")
@@ -532,9 +482,6 @@ function AutoRoll.OnEvent(self, event, arg1, arg2)
 		local timeout = arg2 or 0
 		local texture, name, count, quality, bindOnPickup, canNeed, canGreed, canDisenchant = GetLootRollItemInfo(rollId)
 
-		-- Auto-roll by quality: if enabled and item quality matches and player
-		-- meets the level threshold, roll automatically. Saved item rules take
-		-- priority and are checked below -- this only fires if no saved rule exists.
 		local autoRolledByQuality = false
 		if AutoRoll_Options.AutoGreedGreens then
 			local playerLevel = UnitLevel("player") or 0
@@ -542,7 +489,6 @@ function AutoRoll.OnEvent(self, event, arg1, arg2)
 			local quals = AutoRoll_Options.AutoGreedQualities or "green"
 			local qualMatch = (quality == 2) or (quals == "greenblue" and quality == 3)
 			if qualMatch and playerLevel >= minLevel then
-				-- Only fire if there's no saved rule for this specific item
 				if not (name and AutoRoll_Autoroll[name]) then
 					local rollChoice = AutoRoll_Options.AutoGreedRoll or "disenchant"
 					local effectiveRoll
@@ -551,8 +497,7 @@ function AutoRoll.OnEvent(self, event, arg1, arg2)
 					elseif rollChoice == "pass" then
 						effectiveRoll = AutoRoll.Roll.Pass
 					else
-						-- disenchant, fall back to greed if not available
-						effectiveRoll = canDisenchant and AutoRoll.Roll.Disenchant or AutoRoll.Roll.Greed
+							effectiveRoll = canDisenchant and AutoRoll.Roll.Disenchant or AutoRoll.Roll.Greed
 					end
 					RollOnLoot(rollId, effectiveRoll)
 					HideRollFrame(rollId)
@@ -572,8 +517,7 @@ function AutoRoll.OnEvent(self, event, arg1, arg2)
 				HideRollFrame(rollId)
 			else
 				AutoRoll.QueueLoot(rollId, timeout, texture, name, quality, canDisenchant)
-				-- Hook the roll frame buttons for right-click autoroll
-				_hookQueue[rollId] = { name = name, quality = quality, canDisenchant = canDisenchant }
+					_hookQueue[rollId] = { name = name, quality = quality, canDisenchant = canDisenchant }
 				_hookPump:Show()
 			end
 		end
@@ -805,7 +749,6 @@ function AutoRoll.RenderAutorollList()
 			text:SetWordWrap(false)
 			row.text = text
 
-			-- Remove button - small text
 			local remove = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
 			remove:SetHeight(18)
 			remove:SetText("Remove")
@@ -814,14 +757,12 @@ function AutoRoll.RenderAutorollList()
 			remove:SetScript("OnClick", function(self)
 				AutoRoll.AutorollListRemove(self:GetParent().itemName)
 			end)
-			-- Make text small
 			local removeText = remove:GetFontString()
 			if removeText then
 				removeText:SetFont(removeText:GetFont(), 10)  -- small text
 			end
 			row.remove = remove
 
-			-- Dropdown button - small text
 			local dropdown = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
 			dropdown:SetHeight(18)
 			dropdown:SetText("Disenchant")
@@ -829,7 +770,6 @@ function AutoRoll.RenderAutorollList()
 			dropdown:SetPoint("LEFT", remove, "RIGHT", 4, 0)
 			row.dropdown = dropdown
 
-			-- Make dropdown text small
 			local ddText = dropdown:GetFontString()
 			if ddText then
 				ddText:SetFont(ddText:GetFont(), 10)
@@ -837,7 +777,6 @@ function AutoRoll.RenderAutorollList()
 
 			text:SetPoint("LEFT", dropdown, "RIGHT", 4, 0)
 
-			-- Dropdown menu (unchanged)
 			local dropdownMenu = {
 				{ text = "Need", value = AutoRoll.Roll.Need },
 				{ text = "Greed", value = AutoRoll.Roll.Greed },
