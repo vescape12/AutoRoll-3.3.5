@@ -184,7 +184,7 @@ local function CreateOptionsFrame()
 	rowTip:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
 	local header = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	header:SetPoint("TOPLEFT", 16, -138)
+	header:SetPoint("TOPLEFT", 16, -108)
 	header:SetText("Saved auto-roll items")
 
 	local searchBox = CreateFrame("EditBox", "AutoRollOptionsFrame_Search", f, "InputBoxTemplate")
@@ -211,9 +211,9 @@ local function CreateOptionsFrame()
 	AutoRollOptionsFrame_Search = searchBox
 
 	local scrollFrame = CreateFrame("ScrollFrame", "AutoRollOptionsFrame_AutorollScroll", f, "UIPanelScrollFrameTemplate")
-	scrollFrame:SetPoint("TOPLEFT", 12, -158)
+	scrollFrame:SetPoint("TOPLEFT", 12, -128)
 	scrollFrame:SetWidth(527)
-	scrollFrame:SetHeight(312)
+	scrollFrame:SetHeight(342)
 
 	local content = CreateFrame("Frame", "AutoRollOptionsFrame_AutorollScrollContent", scrollFrame)
 	content:SetWidth(520)
@@ -759,7 +759,8 @@ function AutoRoll.RenderAutorollList()
 			end)
 			local removeText = remove:GetFontString()
 			if removeText then
-				removeText:SetFont(removeText:GetFont(), 10)  -- small text
+				removeText:SetFont(removeText:GetFont(), 11)  -- small text
+				removeText:SetPoint("CENTER", remove, "CENTER", 0, -1)
 			end
 			row.remove = remove
 
@@ -772,7 +773,8 @@ function AutoRoll.RenderAutorollList()
 
 			local ddText = dropdown:GetFontString()
 			if ddText then
-				ddText:SetFont(ddText:GetFont(), 10)
+				ddText:SetFont(ddText:GetFont(), 11)
+				ddText:SetPoint("CENTER", dropdown, "CENTER", 0, -1)
 			end
 
 			text:SetPoint("LEFT", dropdown, "RIGHT", 4, 0)
